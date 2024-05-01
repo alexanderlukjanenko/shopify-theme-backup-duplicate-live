@@ -25,8 +25,6 @@ inputs:
     default: 'backup live theme - '
 runs:
   using: "composite"
-  env:
-    SHOPIFY_CLI_TTY: 0
   steps:
     #
     # Install tools (node, ruby, Shopify CLI)
@@ -48,6 +46,7 @@ runs:
       env:
         SHOPIFY_FLAG_STORE: '${{ inputs.store-url }}'
         SHOPIFY_CLI_THEME_TOKEN: ${{ inputs.store-password }}
+        SHOPIFY_CLI_TTY: 0
       run: shopify theme pull --live
       shell: bash
     #
@@ -57,12 +56,20 @@ runs:
       id: upload_theme
       run: echo theme_id=$(shopify theme share --no-color | awk -F "https://" '{print $2}' | awk -F "=" '{print $2}') >> $GITHUB_OUTPUT
       shell: bash
+      env:
+        SHOPIFY_FLAG_STORE: '${{ inputs.store-url }}'
+        SHOPIFY_CLI_THEME_TOKEN: ${{ inputs.store-password }}
+        SHOPIFY_CLI_TTY: 0
     #
     # Rename theme
     #
     - name: Rename theme
       run: shopify theme rename --theme ${{ steps.upload_theme.outputs.theme_id }} --name "${{ inputs.theme-name-prefix }} - `date +'%Y-%m-%d %H:%M:%S'`"
       shell: bash
+      env:
+        SHOPIFY_FLAG_STORE: '${{ inputs.store-url }}'
+        SHOPIFY_CLI_THEME_TOKEN: ${{ inputs.store-password }}
+        SHOPIFY_CLI_TTY: 0
 branding:
   icon: 'copy'
   color: 'white'

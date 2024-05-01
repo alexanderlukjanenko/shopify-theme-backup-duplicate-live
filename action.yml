@@ -53,13 +53,14 @@ runs:
     # Share as duplicate 
     #
     - name: 'Push theme to ${{ inputs.store-name }}'
-      run: echo PREVIEW_THEME_ID=$(shopify theme share | awk -F "https://" '{print $2}' | awk -F "=" '{print $2}' ) >> $GITHUB_ENV
+      id: upload_theme
+      run: echo theme_id=$(shopify theme share --no-color | awk -F "https://" '{print $2}' | awk -F "=" '{print $2}') >> $GITHUB_OUTPUT
       shell: bash
     #
     # Rename theme
     #
     - name: Rename theme
-      run: shopify theme rename --theme ${{ env.PREVIEW_THEME_ID }} --name "${{ inputs.theme-name-prefix }} - `date +'%Y-%m-%d %H:%M:%S'`"
+      run: shopify theme rename --theme ${{ steps.upload_theme.outputs.theme_id }} --name "${{ inputs.theme-name-prefix }} - `date +'%Y-%m-%d %H:%M:%S'`"
       shell: bash
 branding:
   icon: 'copy'

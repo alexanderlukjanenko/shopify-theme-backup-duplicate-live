@@ -64,7 +64,7 @@ runs:
     # Rename theme
     #
     - name: Rename theme
-      run: shopify theme rename --theme ${{ steps.upload_theme.outputs.theme_id }} --name "${{ inputs.theme-name-prefix }} - `date +'%Y-%m-%d %H:%M:%S'`"
+      run: shopify theme rename --theme ${{ steps.upload_theme.outputs.theme_id }} --name "${{ inputs.theme-name-prefix }} `date +'%Y-%m-%d %H:%M:%S'`"
       shell: bash
       env:
         SHOPIFY_FLAG_STORE: '${{ inputs.store-url }}'

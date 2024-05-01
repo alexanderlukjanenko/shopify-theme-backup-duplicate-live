@@ -1,0 +1,66 @@
+name: 'Shopify Theme :: Duplicate live theme'
+description: 'Download live theme. Upload to the same store as unpublished theme. Name the new theme with provided prefix and time stamp.'
+inputs:
+  #
+  # Shopify store details
+  #
+  store-name:
+    description: 'Shopify store name'
+    required: true
+    default: 'My Store'
+  store-url:
+    description: 'Shopify store URL'
+    required: true
+    default: 'my-store.myshopify.com'
+  store-password:
+    description: 'Secret to access your store. 1. Install "Theme access" app. 2. Create password. 3. Use it here. Shopify help page https://shopify.dev/docs/themes/tools/theme-access#install-the-theme-access-app'
+    required: true
+    default: 'Generate your password with the Theme access app'
+  #
+  # Theme name prefix
+  #
+  theme-name-prefix:
+    description: 'Theme name prefix. Max 30 symbols.'
+    required: false
+    default: 'backup live theme - '
+runs:
+  using: "composite"
+  steps:
+    #
+    # Install tools (node, ruby, Shopify CLI)
+    #
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 20
+    - uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: 3.1
+        bundler: "latest"
+    - name: Install Shopify CLI
+      run: npm install -g @shopify/cli@3.58.2 @shopify/theme@3.58.2
+      shell: bash
+    #
+    # Get theme
+    #
+    - name: 'Get files from live theme from store ${{ inputs.store-name }}'
+      env:
+        SHOPIFY_FLAG_STORE: '${{ inputs.store-url }}'
+        SHOPIFY_CLI_THEME_TOKEN: ${{ inputs.store-password }}
+        SHOPIFY_CLI_TTY: 0
+      run: shopify theme pull --live
+      shell: bash
+    #
+    # Share as duplicate 
+    #
+    - name: 'Push theme to ${{ inputs.store-name }}'
+      run: echo PREVIEW_THEME_ID=$(shopify theme share | awk -F "https://" '{print $2}' | awk -F "=" '{print $2}' ) >> $GITHUB_ENV
+      shell: bash
+    #
+    # Rename theme
+    #
+    - name: Rename theme
+      run: shopify theme rename --theme ${{ env.PREVIEW_THEME_ID }} --name "${{ inputs.theme-name-prefix }} - `date +'%Y-%m-%d %H:%M:%S'`"
+      shell: bash
+branding:
+  icon: 'copy'
+  color: 'white'

@@ -25,6 +25,8 @@ inputs:
     default: 'backup live theme - '
 runs:
   using: "composite"
+  env:
+    SHOPIFY_CLI_TTY: 0
   steps:
     #
     # Install tools (node, ruby, Shopify CLI)
@@ -46,7 +48,6 @@ runs:
       env:
         SHOPIFY_FLAG_STORE: '${{ inputs.store-url }}'
         SHOPIFY_CLI_THEME_TOKEN: ${{ inputs.store-password }}
-        SHOPIFY_CLI_TTY: 0
       run: shopify theme pull --live
       shell: bash
     #
